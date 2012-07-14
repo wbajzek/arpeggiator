@@ -1,11 +1,8 @@
 var midi = require('midi');
 
-var midiInput = new midi.input();
-var midiOutput = new midi.output();
-
 var input = [];
-midiInput.getPortCount();
-midiInput.getPortName(0);
+
+var midiInput = new midi.input();
 midiInput.on("message", function(deltaTime,message) {
     if (message[0] < 144 || message[0] > 159) // ignore everything but notes
         return;
@@ -24,6 +21,8 @@ midiInput.on("message", function(deltaTime,message) {
 });
 midiInput.openPort(0);
 
+
+var midiOutput = new midi.output();
 midiOutput.openVirtualPort("Arpeggiator");
 
 // I'd love to sync with midi clock at some point, but for now I just have
