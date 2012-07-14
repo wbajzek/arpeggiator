@@ -13,8 +13,11 @@ var Clock = function(tempo, tick) {
     }
 }
 function Arp(modeNext) {
+    var songStarted = false;
+
     var midiInput = new midi.input();
     midiInput.on("message", function(deltaTime,message) {
+        console.log(message);
         if (message[0] < 144 || message[0] > 159) // ignore everything but notes
             return;
         if (message[2] == 0) {  // note release
@@ -44,8 +47,13 @@ function Arp(modeNext) {
 
     this.note = function() {
         var note = modeNext();
-        if (typeof note != 'undefined') // Simple "Thread Safety"
+        if (typeof note != 'undefined') { // Simple "Thread Safety"
+            if (!songStarted){
+                midiOutput.sendMessage([ 176, 25, 0 ]); // song start. Why doesn't this work?
+                songStarted = true;
+            }
             midiOutput.sendMessage(note) ;
+        }
     }
 }
 // cycle through the notes
@@ -88,6 +96,7 @@ function OneThree() {
     return next;
 }
 
+var tempo = process.argv[2]; // take the tempo as a command-line argument
 var arp1 = new Arp(OneThree());
-var clock1 = new Clock(240,arp1.note);
+var clock1 = new Clock(tempo,arp1.note);
 clock1.run();
