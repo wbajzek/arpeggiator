@@ -11,5 +11,5 @@ git://github.com/justinlatimer/node-midi.git
     node arpeggiator.js 180
 
 
-First command-line argument is the song tempo.
+First command-line argument is the tempo.
 You can tweak the code at the end to which kind of arpeggio.
