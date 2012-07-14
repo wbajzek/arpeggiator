@@ -2,29 +2,6 @@ var midi = require('midi');
 
 var input = [];
 
-var midiInput = new midi.input();
-midiInput.on("message", function(deltaTime,message) {
-    if (message[0] < 144 || message[0] > 159) // ignore everything but notes
-        return;
-    if (message[2] == 0) {  // note release
-        var removeIndex = -1;
-        for (var i = 0; i < input.length; i++) {
-            if (input[i][1] == message[1]) {
-                removeIndex = i;
-                break;
-            }
-        }
-        input.splice(removeIndex,1);
-    }
-    else
-        input.push(message);
-});
-midiInput.openPort(0);
-
-
-var midiOutput = new midi.output();
-midiOutput.openVirtualPort("Arpeggiator");
-
 // I'd love to sync with midi clock at some point, but for now I just have
 // a rudimentary clock that ticks at a specific tempo. 'tick' is a function
 // I pass in that gets called every time the clock ticks.
@@ -36,6 +13,35 @@ var Clock = function(tempo, tick) {
     }
 }
 function Arp(modeNext) {
+    var midiInput = new midi.input();
+    midiInput.on("message", function(deltaTime,message) {
+        if (message[0] < 144 || message[0] > 159) // ignore everything but notes
+            return;
+        if (message[2] == 0) {  // note release
+            var removeIndex = -1;
+            for (var i = 0; i < input.length; i++) {
+                if (input[i][1] == message[1]) {
+                    removeIndex = i;
+                    break;
+                }
+            }
+            input.splice(removeIndex,1);
+        }
+        else
+            input.push(message);
+    });
+    try {
+        midiInput.openPort(0);
+    }
+    catch (error) {
+        console.log("midi port is unavailable. exiting.");
+        process.exit(1);
+    }
+
+
+    var midiOutput = new midi.output();
+    midiOutput.openVirtualPort("Arpeggiator");
+
     this.note = function() {
         var note = modeNext();
         if (typeof note != 'undefined') // Simple "Thread Safety"
