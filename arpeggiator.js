@@ -22,33 +22,31 @@ midiInput.on("message", function(deltaTime,message) {
     }
     else
         input.push(message);
-    console.log(input);
 });
 midiInput.openPort(0);
 
 midiOutput.openVirtualPort("Arpeggiator");
 
-
+// I'd love to sync with midi clock at some point, but for now I just have
+// a rudimentary clock that ticks at a specific tempo. 'tick' is a function
+// I pass in that gets called every time the clock ticks.
 var Clock = function(tempo, tick) {
     var interval;
 
     this.run = function() { interval = setInterval(function() {tick()}, 60 * 1000 / tempo);
     }
 }
-var Arp = function(nextForMode) {
-    var self = this; 
-    var i = 0;
-
+function Arp(modeNext) {
     this.note = function() {
         if (input.length > 0) {
-            var note = nextForMode();
+            var note = modeNext();
             if (typeof note != 'undefined')
                 midiOutput.sendMessage(note) ;
         }
     }
 }
-
-var Up = function() {
+// cycle through the notes
+function Up() {
     var i = 0;
 
     var next = function() {
@@ -58,8 +56,8 @@ var Up = function() {
     }
     return next;
 }
-
-var UpDown = function() {
+// back and forth through the notes
+function UpDown() {
     var i = 0, mode = 0;
 
     var next = function() {
@@ -72,7 +70,8 @@ var UpDown = function() {
     return next;
 }
 
-var OneThree = function() {
+// Skip ahead two notes, step back one, ...
+function OneThree() {
     var i = 0, up = true;
 
     var next = function() {
@@ -87,6 +86,5 @@ var OneThree = function() {
 }
 
 var arp1 = new Arp(OneThree());
-var clock1 = new Clock(180,arp1.note);
+var clock1 = new Clock(240,arp1.note);
 clock1.run();
-//setTimeout(function() { input = ["b2","d2","f2","a2"] }, 5000);
