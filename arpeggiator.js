@@ -1,22 +1,38 @@
-//var midi = require('midi');
-//
-//var midiInput = new midi.input();
-//
-//input.getPortCount();
-//input.getPortName(0);
-//input.on("message", function(deltaTime,message) {
-//    console.log('m:'+message+' d:'+deltaTime);
-//});
-//input.openPort(0);
+var midi = require('midi');
 
+var midiInput = new midi.input();
+var midiOutput = new midi.output();
 
+var input = [];
+midiInput.getPortCount();
+midiInput.getPortName(0);
+midiInput.on("message", function(deltaTime,message) {
+    if (message[0] != 144)
+        return;
+
+    if (message[2] == 0) {  // note release
+        var removeIndex = -1;
+        for (var i = 0; i < input.length; i++) {
+            if (input[i][1] == message[1]) {
+                removeIndex = i;
+                break;
+            }
+        }
+        input.splice(removeIndex,1);
+    }
+    else
+        input.push(message);
+    console.log(input);
+});
+midiInput.openPort(0);
+
+midiOutput.openVirtualPort("Arpeggiator");
 
 
 var Clock = function(tempo, tick) {
     var interval;
 
-    this.run = function() {
-        interval = setInterval(function() {tick()}, 60 * 1000 / tempo);
+    this.run = function() { interval = setInterval(function() {tick()}, 60 * 1000 / tempo);
     }
 }
 var Arp = function(nextForMode) {
@@ -24,7 +40,11 @@ var Arp = function(nextForMode) {
     var i = 0;
 
     this.note = function() {
-        console.log(nextForMode()) ;
+        if (input.length > 0) {
+            var note = nextForMode();
+            if (typeof note != 'undefined')
+                midiOutput.sendMessage(note) ;
+        }
     }
 }
 
@@ -66,7 +86,6 @@ var OneThree = function() {
     return next;
 }
 
-var input = ["a1","c1","e1","f1"];
 var arp1 = new Arp(OneThree());
 var clock1 = new Clock(180,arp1.note);
 clock1.run();
