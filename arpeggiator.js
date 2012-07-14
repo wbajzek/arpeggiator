@@ -7,9 +7,8 @@ var input = [];
 midiInput.getPortCount();
 midiInput.getPortName(0);
 midiInput.on("message", function(deltaTime,message) {
-    if (message[0] != 144)
+    if (message[0] < 144 || message[0] > 159) // ignore everything but notes
         return;
-
     if (message[2] == 0) {  // note release
         var removeIndex = -1;
         for (var i = 0; i < input.length; i++) {
@@ -31,9 +30,10 @@ midiOutput.openVirtualPort("Arpeggiator");
 // a rudimentary clock that ticks at a specific tempo. 'tick' is a function
 // I pass in that gets called every time the clock ticks.
 var Clock = function(tempo, tick) {
-    var interval;
+    var interval; // might want to be able to turn this off
 
-    this.run = function() { interval = setInterval(function() {tick()}, 60 * 1000 / tempo);
+    this.run = function() { 
+        interval = setInterval(function() {tick()}, 60 * 1000 / tempo);
     }
 }
 function Arp(modeNext) {
