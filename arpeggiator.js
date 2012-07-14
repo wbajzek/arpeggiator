@@ -38,11 +38,9 @@ var Clock = function(tempo, tick) {
 }
 function Arp(modeNext) {
     this.note = function() {
-        if (input.length > 0) {
-            var note = modeNext();
-            if (typeof note != 'undefined')
-                midiOutput.sendMessage(note) ;
-        }
+        var note = modeNext();
+        if (typeof note != 'undefined') // Simple "Thread Safety"
+            midiOutput.sendMessage(note) ;
     }
 }
 // cycle through the notes
