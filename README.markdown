@@ -8,7 +8,8 @@ Requires node.js and justinlatimer's midi module.
 git://github.com/justinlatimer/node-midi.git
 
 ## Usage
-    node arpeggiator.js
+    node arpeggiator.js 180
 
 
-You can tweak the code at the end to specify tempo and which kind of arpeggio.
+First command-line argument is the song tempo.
+You can tweak the code at the end to which kind of arpeggio.
